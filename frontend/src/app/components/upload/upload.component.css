@@ -1,0 +1,30 @@
+.preview-image {
+  max-height: 24rem;
+}
+
+.preview-canvas {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.sign-overlay {
+  box-shadow: 0 8px 30px rgba(2,6,23,0.7);
+  cursor: move;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resize-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+}
+.resize-handle.top-left { left: 0; top: 0; cursor: nwse-resize; }
+.resize-handle.top-right { right: 0; top: 0; cursor: nesw-resize; transform: translate(50%, -50%); }
+.resize-handle.bottom-left { left: 0; bottom: 0; cursor: nesw-resize; transform: translate(-50%, 50%); }
+.resize-handle.bottom-right { right: 0; bottom: 0; cursor: nwse-resize; transform: translate(50%, 50%); }

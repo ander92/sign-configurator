@@ -1,0 +1,86 @@
+<section class="p-6 bg-slate-900 rounded-3xl text-slate-100">
+  <h2 class="text-2xl font-semibold mb-4">Formular simulare reclamă</h2>
+
+  <label class="block mb-3">
+    <div class="flex items-center justify-between">
+      <span>Nume proiect (ce să apară pe reclamă)</span>
+      <span title="Numele proprietății sau textul care va apărea pe reclamă">?</span>
+    </div>
+    <input class="mt-2 w-full rounded p-2 bg-slate-800 text-slate-100" [(ngModel)]="projectName" />
+  </label>
+
+  <label class="block mb-3">
+    <div class="flex items-center justify-between">
+      <span>Ai un logo? (opţional)</span>
+      <span title="Poți încărca un fişier cu logo-ul tău">?</span>
+    </div>
+    <input type="file" accept="image/*" (change)="onLogoChange($event)" class="mt-2" />
+  </label>
+
+  <label class="block mb-3">
+    <div class="flex items-center justify-between">
+      <span>Ce tip de reclamă dorești?</span>
+      <span title="Alege tipul de produs pe care îl doreşti">?</span>
+    </div>
+    <select class="mt-2 w-full rounded p-2 bg-slate-800 text-slate-100" [(ngModel)]="adType">
+      <option *ngFor="let t of adTypes" [value]="t">{{ t }}</option>
+    </select>
+  </label>
+
+  <label class="block mb-3">
+    <div class="flex items-center justify-between">
+      <span>Ce dimensiune dorești să aibă reclama? (L x H în metri)</span>
+      <span title="Lungime = distanţa stânga-dreapta; Înălţime = distanţa jos-sus">?</span>
+    </div>
+    <input class="mt-2 w-full rounded p-2 bg-slate-800 text-slate-100" placeholder="ex: 3m x 0.8m" [(ngModel)]="dimensions" />
+  </label>
+
+  <label class="block mb-3">
+    <div class="flex items-center justify-between">
+      <span>Ce tip de iluminare dorești?</span>
+      <span title="Rece = albastră rece; Caldă = galbenă; Neutră = alb natural">?</span>
+    </div>
+    <select class="mt-2 w-full rounded p-2 bg-slate-800 text-slate-100" [(ngModel)]="lighting">
+      <option *ngFor="let l of lightingOptions" [value]="l">{{ l }}</option>
+    </select>
+  </label>
+
+  <label class="block mb-3">
+    <div class="flex items-center justify-between">
+      <span>Culoare casetă / litere</span>
+      <span title="Scrie culoarea dorită (alb, negru, auriu, etc.)">?</span>
+    </div>
+    <input class="mt-2 w-full rounded p-2 bg-slate-800 text-slate-100" placeholder="ex: alb, negru, auriu" [(ngModel)]="color" />
+  </label>
+
+  <label class="block mb-3">
+    <div class="flex items-center justify-between">
+      <span>Încarcă o imagine cu spațiul (opţional)</span>
+      <span title="Imaginea va fi folosită ca referinţă pentru simulare">?</span>
+    </div>
+    <input type="file" accept="image/*" (change)="onLocationImageChange($event)" class="mt-2" />
+  </label>
+
+  <div class="mt-4 flex gap-3">
+    <button class="bg-emerald-500 px-4 py-2 rounded" (click)="generateSimulation()" [disabled]="isGenerating">{{ isGenerating ? 'Se generează...' : 'Generează simulare' }}</button>
+    <button class="bg-gray-700 px-4 py-2 rounded" (click)="compiledPrompt = compileSentence();">Vezi prompt</button>
+  </div>
+
+  <div *ngIf="compiledPrompt" class="mt-4 p-3 bg-slate-800 rounded">
+    <strong>Prompt compilat:</strong>
+    <div class="mt-2 text-sm">{{ compiledPrompt }}</div>
+  </div>
+
+  <div *ngIf="simulation" class="mt-4 p-4 bg-slate-800 rounded">
+    <h3 class="font-semibold mb-2">Simulare</h3>
+    <div class="whitespace-pre-wrap">{{ simulation }}</div>
+
+    <div class="mt-4 flex gap-3">
+      <button class="bg-sky-500 px-4 py-2 rounded" (click)="generateSimulation()">Generează din nou</button>
+      <button class="bg-amber-500 px-4 py-2 rounded" (click)="requestOffer({ name: 'Client', email: 'client@example.com' })">Solicită ofertă</button>
+      <button class="bg-gray-600 px-4 py-2 rounded" (click)="alert('Un consultant te va contacta. Alege opțiunea: sunat sau sun eu acum.')">Vreau să fiu contactat</button>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="mt-4 text-red-400">{{ error }}</div>
+</section>
