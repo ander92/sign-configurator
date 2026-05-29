@@ -81,12 +81,15 @@ export class UploadComponent {
       size: this.selectedSize
     };
 
+    console.log('[UploadComponent] Generating image, payload preview:', { url: `${environment.apiUrl}/openai/generate`, prompt: payload.prompt.slice(0,100), size: payload.size, hasImage: !!this.buildingImageBase64 });
+
     if (this.buildingImageBase64) {
       payload.imageBase64 = this.buildingImageBase64;
     }
 
     this.http.post<{ success: boolean; image: string }>(`${environment.apiUrl}/openai/generate`, payload).subscribe({
       next: (response) => {
+        console.log('[UploadComponent] Generation response:', response);
         this.isGenerating = false;
         if (!response.success) {
           this.openAiError = 'Generarea imaginii a eșuat. Încearcă un alt prompt.';
@@ -107,6 +110,7 @@ export class UploadComponent {
         }
       },
       error: (error) => {
+        console.error('[UploadComponent] Generation error response:', error);
         this.isGenerating = false;
         this.openAiError = error?.error?.error || 'Nu se poate genera imaginea în acest moment.';
       }

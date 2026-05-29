@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 
+console.log('[frontend/api/openai] Handler module loaded. OPENAI_API_KEY is', process.env.OPENAI_API_KEY ? 'SET' : 'NOT SET');
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 function parseBase64Image(dataUrl: string): { base64: string; mime: string } | null {
@@ -25,6 +26,7 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    console.log('[frontend/api/openai] Incoming request', { method: req.method, bodyPreview: JSON.stringify(req.body ?? {}).slice(0,200) });
     let response;
 
     if (imageBase64 && typeof imageBase64 === 'string') {
@@ -41,17 +43,21 @@ export default async function handler(req: any, res: any) {
 
       const signPrompt = `${prompt}. Render ONLY the store sign / logo on a fully transparent background. Do not include any surrounding building or context.`;
 
+      console.log('[frontend/api/openai] Calling OpenAI images.generate (with image)');
       response = await client.images.generate({
         model: 'gpt-image-1',
         prompt: signPrompt,
         size: finalSize,
       });
+      console.log('[frontend/api/openai] OpenAI response (with image) head:', { ok: !!response?.data?.[0] });
     } else {
+      console.log('[frontend/api/openai] Calling OpenAI images.generate (no image)');
       response = await client.images.generate({
         model: 'gpt-image-1',
         prompt,
         size: finalSize,
       });
+      console.log('[frontend/api/openai] OpenAI response (no image) head:', { ok: !!response?.data?.[0] });
     }
 
     const base64 = response.data?.[0]?.b64_json;
@@ -61,7 +67,7 @@ export default async function handler(req: any, res: any) {
 
     res.status(200).json({ success: true, image: `data:image/png;base64,${base64}` });
   } catch (error: any) {
-    console.error('OpenAI generation error', error);
+    console.error('[frontend/api/openai] OpenAI generation error', { message: error?.message, stack: error?.stack, full: error });
     const message = error?.message || (error?.toString && error.toString()) || 'Nu se poate genera imaginea.';
     res.status(500).json({ error: `Generarea imaginii a eșuat: ${message}` });
   }
