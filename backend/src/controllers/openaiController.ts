@@ -91,13 +91,20 @@ export async function generateImage(req: Request, res: Response): Promise<Respon
     console.log('[generateImage] Image converted to base64, returning response');
     return res.json({ success: true, image: `data:image/png;base64,${base64}` });
   } catch (error) {
+    const err: any = error;
+    const status = err?.status ?? err?.statusCode ?? 'unknown';
+    const body = err?.body ?? err?.response ?? undefined;
+    const errorMessage = error instanceof Error && error.message ? error.message : body ? JSON.stringify(body) : 'Nu se poate genera imaginea.';
+
     console.error('[generateImage] ERROR:', {
       errorType: error?.constructor?.name,
-      message: error instanceof Error ? error.message : String(error),
+      status,
+      message: errorMessage,
       stack: error instanceof Error ? error.stack : undefined,
+      body,
       fullError: error,
     });
-    const errorMessage = error instanceof Error ? error.message : 'Nu se poate genera imaginea.';
+
     return res.status(500).json({ error: `Generarea imaginii a eșuat: ${errorMessage}` });
   }
 }
