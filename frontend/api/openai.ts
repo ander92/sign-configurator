@@ -41,13 +41,16 @@ export default async function handler(req: any, res: any) {
         return res.status(413).json({ error: 'Imaginea încărcată este prea mare (maxim 5 MB).' });
       }
 
-      const signPrompt = `${prompt}. Render ONLY the store sign / logo on a fully transparent background. Do not include any surrounding building or context.`;
+      // Use images.edit to modify the building image with the sign
+      console.log('[frontend/api/openai] Calling OpenAI images.edit (image-to-image)');
+      const imageBuffer = Buffer.from(parsed.base64, 'base64');
+      const imageFile = new File([imageBuffer], 'building.png', { type: parsed.mime });
 
-      console.log('[frontend/api/openai] Calling OpenAI images.generate (with image)');
-      response = await client.images.generate({
+      response = await client.images.edit({
         model: 'gpt-image-1',
-        prompt: signPrompt,
-        size: finalSize,
+        image: imageFile,
+        prompt: prompt,
+        size: finalSize as any,
       });
       console.log('[frontend/api/openai] OpenAI response (with image) head:', { ok: !!response?.data?.[0] });
     } else {
@@ -55,7 +58,7 @@ export default async function handler(req: any, res: any) {
       response = await client.images.generate({
         model: 'gpt-image-1',
         prompt,
-        size: finalSize,
+        size: finalSize as any,
       });
       console.log('[frontend/api/openai] OpenAI response (no image) head:', { ok: !!response?.data?.[0] });
     }

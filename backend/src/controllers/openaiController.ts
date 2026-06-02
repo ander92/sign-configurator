@@ -47,16 +47,11 @@ export async function generateImage(req: Request, res: Response): Promise<Respon
   }
 
   try {
-    let input: any = {
-      prompt: prompt,
-      num_images: 1,
-    };
-
-    // Resize dimensions based on selected size
-    const [width, height] = finalSize.split('x').map(Number);
-    input.image_size = { width, height };
+    let modelId: string;
+    let input: any;
 
     if (imageBase64 && typeof imageBase64 === 'string') {
+      // --- Image-to-Image mode: modify building photo to include the sign ---
       const parsed = parseBase64Image(imageBase64);
       if (!parsed) {
         return res.status(400).json({ error: 'Date imagine invalide.' });
@@ -68,16 +63,37 @@ export async function generateImage(req: Request, res: Response): Promise<Respon
         return res.status(413).json({ error: 'Imaginea încărcată este prea mare (maxim 5 MB).' });
       }
 
-      // Add image context to prompt
-      const signPrompt = `${prompt}. Render ONLY the store sign / logo on a fully transparent background. Do not include any surrounding building or context.`;
-      input.prompt = signPrompt;
+      // Use flux-general image-to-image — sends the building image + prompt
+      modelId = 'fal-ai/flux-general/image-to-image';
+      input = {
+        prompt: prompt,
+        image_url: imageBase64, // data URI accepted directly by Fal AI
+        strength: 0.72, // preserve building structure, add the sign
+        num_images: 1,
+        num_inference_steps: 28,
+        guidance_scale: 4.0,
+        output_format: 'png',
+      };
+
+      console.log('[generateImage] Using image-to-image mode (flux-general)');
+    } else {
+      // --- Text-to-Image mode: generate conceptual sign image ---
+      modelId = 'fal-ai/flux-2-flex';
+      const [width, height] = finalSize.split('x').map(Number);
+      input = {
+        prompt: prompt,
+        num_images: 1,
+        image_size: { width, height },
+        num_inference_steps: 28,
+        output_format: 'png',
+      };
+
+      console.log('[generateImage] Using text-to-image mode (flux-2-flex)');
     }
 
-    // Call Fal AI Flux 2 Flex model
-    console.log('[generateImage] Calling Fal AI flux-2-flex...');
-    const result = await fal.subscribe('fal-ai/flux-2-flex', {
-      input: input,
-    });
+    // Call Fal AI
+    console.log('[generateImage] Calling Fal AI model:', modelId);
+    const result = await fal.subscribe(modelId, { input });
     console.log('[generateImage] Fal AI response received:', { hasData: !!result.data, hasImages: !!result.data?.images });
 
     // Extract the generated image URL and convert to base64
