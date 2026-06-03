@@ -81,28 +81,51 @@ export class UploadComponent {
     }
 
     const parts: string[] = [];
-
-    if (this.buildingImageBase64) {
-      parts.push(`Adaugă pe fațada clădirii din imagine o firmă luminoasă cu textul „${this.signText.trim()}"`);
-    } else {
-      parts.push(`Generează o firmă luminoasă cu textul „${this.signText.trim()}"`);
-    }
+    parts.push(`an illuminated commercial sign reading "${this.signText.trim()}"`);
 
     if (this.signType) {
-      parts.push(`tip: ${this.signType}`);
+      const typeMap: Record<string, string> = {
+        'litere volumetrice': 'made of 3D volumetric backlit letters',
+        'casetă luminoasă': 'as an illuminated light box sign',
+        'neon LED': 'as a glowing LED neon sign',
+        'litere PVC iluminate': 'made of backlit PVC channel letters',
+        'banner luminat': 'as an illuminated banner sign',
+        'totem publicitar': 'as a freestanding pylon/totem sign',
+      };
+      parts.push(typeMap[this.signType] || this.signType);
     }
     if (this.signStyle) {
-      parts.push(`stil ${this.signStyle}`);
+      const styleMap: Record<string, string> = {
+        'modern': 'modern design',
+        'clasic': 'classic elegant design',
+        'industrial': 'industrial style',
+        'minimalist': 'minimalist clean design',
+        'retro/vintage': 'retro vintage style',
+        'luxos/premium': 'luxury premium look',
+      };
+      parts.push(styleMap[this.signStyle] || this.signStyle);
     }
     if (this.lightColor) {
-      parts.push(`iluminare ${this.lightColor}`);
+      const colorMap: Record<string, string> = {
+        'alb cald (3000K)': 'glowing with warm white light',
+        'alb rece (6000K)': 'glowing with cool white light',
+        'RGB multicolor': 'with colorful RGB illumination',
+        'roșu': 'glowing red',
+        'albastru': 'glowing blue',
+        'verde': 'glowing green',
+        'auriu': 'glowing golden',
+      };
+      parts.push(colorMap[this.lightColor] || this.lightColor);
     }
     if (this.signPosition) {
-      parts.push(`poziționată ${this.signPosition}`);
-    }
-
-    if (this.buildingImageBase64) {
-      parts.push('Firma trebuie să se integreze natural în arhitectura clădirii, cu perspectivă și iluminare realistă');
+      const posMap: Record<string, string> = {
+        'deasupra ușii de intrare': 'mounted above the entrance door',
+        'în centrul fațadei': 'centered on the building facade',
+        'pe colțul clădirii': 'on the corner of the building',
+        'pe acoperiș': 'on the rooftop',
+        'la nivelul etajului 1': 'at first floor level',
+      };
+      parts.push(posMap[this.signPosition] || this.signPosition);
     }
 
     this.prompt = parts.join(', ') + '.';
@@ -110,10 +133,7 @@ export class UploadComponent {
 
   onFileChange(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (!input.files?.length) {
-      return;
-    }
-
+    if (!input.files?.length) return;
     this.imageFile = input.files[0];
     const reader = new FileReader();
     reader.onload = () => {
@@ -121,7 +141,6 @@ export class UploadComponent {
       this.buildingImageBase64 = reader.result as string;
       this.imagePreview = this.buildingImageBase64;
       this.generatedImage = undefined;
-      // Rebuild prompt to reflect image context
       this.buildPrompt();
     };
     reader.readAsDataURL(this.imageFile);
@@ -163,12 +182,14 @@ export class UploadComponent {
 
     this.isGenerating = true;
     this.openAiError = undefined;
+    this.generatedImage = undefined;
 
     const payload: any = {
       prompt: this.prompt.trim(),
       size: this.selectedSize
     };
 
+    // Send building image to backend if available — GPT Image 2 will integrate the sign
     if (this.buildingImageBase64) {
       payload.imageBase64 = this.buildingImageBase64;
     }
@@ -180,7 +201,6 @@ export class UploadComponent {
           this.openAiError = 'Generarea imaginii a eșuat. Încearcă un alt prompt.';
           return;
         }
-        // The response is the complete final image (building + sign integrated)
         this.generatedImage = response.image;
       },
       error: (error) => {
@@ -191,10 +211,9 @@ export class UploadComponent {
   }
 
   downloadImage(): void {
-    const target = this.generatedImage ?? this.imagePreview;
-    if (!target) return;
+    if (!this.generatedImage) return;
     const a = document.createElement('a');
-    a.href = target;
+    a.href = this.generatedImage;
     a.download = 'firma-generata.png';
     document.body.appendChild(a);
     a.click();

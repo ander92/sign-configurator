@@ -106,7 +106,7 @@
       <div class="rounded-2xl border-2 border-dashed border-slate-700 bg-slate-950/50 p-6 text-center hover:border-slate-500 transition-colors">
         <div *ngIf="!imagePreview">
           <p class="text-slate-400 mb-3">Încarcă o poză cu clădirea ta (opțional)</p>
-          <p class="text-xs text-slate-500 mb-4">Dacă încarci o imagine, firma va fi integrată direct pe clădire</p>
+          <p class="text-xs text-slate-500 mb-4">AI-ul va integra firma realist direct pe clădire (ca în ChatGPT)</p>
           <label class="inline-block cursor-pointer rounded-xl bg-sky-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-sky-500">
             Alege imagine
             <input type="file" accept="image/*" (change)="onFileChange($event)" class="hidden" />
@@ -120,7 +120,7 @@
             class="absolute top-2 right-2 rounded-full bg-red-600 w-7 h-7 flex items-center justify-center text-white text-sm hover:bg-red-500"
             title="Șterge imaginea"
           >✕</button>
-          <p class="mt-2 text-xs text-slate-400">Imaginea clădirii — firma va fi integrată pe ea</p>
+          <p class="mt-2 text-xs text-slate-400">AI-ul va integra firma direct pe această clădire</p>
         </div>
       </div>
 
@@ -150,7 +150,7 @@
       <div *ngIf="isGenerating" class="rounded-2xl border border-slate-700 bg-slate-950 p-8 text-center">
         <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent mb-3"></div>
         <p class="text-slate-300">Se generează imaginea cu firma...</p>
-        <p class="text-xs text-slate-500 mt-1">Aceasta poate dura 15–30 secunde</p>
+        <p class="text-xs text-slate-500 mt-1">Aceasta poate dura 30–60 secunde</p>
       </div>
 
       <!-- Empty state when no result yet -->
